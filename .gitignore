@@ -4,3 +4,6 @@
 
 # Python
 __pycache__/
+
+# Other
+backend/app/uploads/

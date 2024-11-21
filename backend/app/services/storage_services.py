@@ -34,8 +34,7 @@ def save_to_local(file):
     
     return file_path
 
-def upload_to_s3(file):
-    filename = secure_filename(file.filename)
+def upload_to_s3(file, filename):
     s3_client.upload_fileobj(
         file,
         S3_BUCKET,
