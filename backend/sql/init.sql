@@ -32,3 +32,7 @@ GRANT usage ON SCHEMA public TO {testuser};
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO {testuser};
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO {testuser};
 GRANT ALL ON SCHEMA public TO {testuser};
+
+
+-- Add field to images
+ALTER TABLE images ADD COLUMN original_filename VARCHAR(255);
