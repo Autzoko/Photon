@@ -5,6 +5,8 @@ from app.services.storage_services import save_to_local, upload_to_s3
 from app.models.image import Image
 from app.models.user import User
 from app.extensions import db
+from app.utils.file_check import allowed_file
+from uuid import uuid4
 
 image_routes = Blueprint('image_routes', __name__)
 
@@ -25,27 +27,23 @@ def upload_image():
     if file.filename == '':
         return jsonify({"error": "No file selected"}), 400
     
-    try:
+    if file and allowed_file(file.filename):
+        original_filename = secure_filename(file.filename)
+        unique_filename = f'{uuid4().hex}_{original_filename}'
         
-        # save to local
-        # local_path = save_to_local(file)
-        
-        # upload to s3
-        filename = secure_filename(file.filename)
-        s3_key = f'{user_id}/{filename}'
-        file_url = upload_to_s3(file, s3_key)
-        
-        new_image = Image(filename=filename, url=file_url, user_id=user.id)
-        db.session.add(new_image)
-        db.session.commit()
-        
-        return jsonify({
-            "message": "File uploaded successfully",
-            #"url": local_path,
-            "url": file_url
-        }), 200
-        
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        try:
+            s3_key = f'{user_id}/{unique_filename}'
+            file_url = upload_to_s3(file, s3_key)
+            
+            new_image = Image(filename=unique_filename, original_filename=original_filename, url=file_url, user_id=user.id)
+            db.session.add(new_image)
+            db.session.commit()
+            
+            return jsonify({
+                "message": "File uploaded successfully",
+                "url": file_url
+            }), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
         
         
